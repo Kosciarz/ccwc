@@ -1,8 +1,19 @@
-ccwc -c test.txt
+./main -c test.txt
+335041
 
+./main -l test.txt
+7144
 
+./main -w test.txt
+58164
 
 ---------------------------------------------
 
 wc -c test.txt
 335041 test.txt
+
+wc -l test.txt
+7144 test.txt
+
+wc -w test.txt
+58164 test.txt
