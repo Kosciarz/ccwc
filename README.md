@@ -50,7 +50,12 @@ To display the help message:
 
 ## What I learned
 
+- How to use Make and create a simple Makefile to build my project.
+
 - How to use the C++ filesystem library for file operations.
+
 - Handling wide character streams with `std::wifstream`.
+
 - Implementing basic command-line argument parsing in C++.
+
 - Using `std::locale` and `std::codecvt_utf8` for UTF-8 file handling.
