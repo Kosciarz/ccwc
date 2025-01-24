@@ -1,11 +1,14 @@
-./main -c test.txt
+./ccwc -c test.txt
 335041
 
-./main -l test.txt
+./ccwc -l test.txt
 7144
 
-./main -w test.txt
+./ccwc -w test.txt
 58164
+
+./ccwc -m test.txt
+332145
 
 ---------------------------------------------
 
@@ -17,3 +20,6 @@ wc -l test.txt
 
 wc -w test.txt
 58164 test.txt
+
+wc -m test.txt
+332145 test.txt

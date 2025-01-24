@@ -1,6 +1,5 @@
 .vscode/
-
-main
+ccwc
 
 *.o
 *.obj

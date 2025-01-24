@@ -13,67 +13,120 @@ std::vector<std::string> ConvertArgvToString(int argc, char** argv)
     return args;
 }
 
-void CountBytes(std::filesystem::path filePath)
+size_t CountBytes(const std::filesystem::path& filePath)
 {
     std::ifstream file(filePath);
+    if (!file.is_open())
+        throw std::runtime_error("Can't open a file with path: " / filePath);
 
-    char ch;
-    int numberOfBytes{};
+    size_t bytesCount{};
+    char ch{};
     while (file.get(ch))
     {
-        numberOfBytes++;
+        bytesCount++;
     }
-    std::cout << numberOfBytes << '\n';
 
     file.close();
+    return bytesCount;
 }
 
-void CountLines(std::filesystem::path filePath)
+size_t CountLines(const std::filesystem::path& filePath)
 {
     std::ifstream file(filePath);
+    if (!file.is_open())
+        throw std::runtime_error("Can't open a file with path: " / filePath);
 
-    int numberOfLines{};
+    size_t linesCount{};
     std::string fileLine{};
     while (std::getline(file, fileLine))
     {
-        numberOfLines++;
+        linesCount++;
     }
-    std::cout << numberOfLines << '\n';
 
     file.close();
+    return linesCount;
 }
 
-void CountWords(std::filesystem::path filePath)
+size_t CountWords(const std::filesystem::path& filePath)
 {
     std::ifstream file(filePath);
+    if (!file.is_open())
+        throw std::runtime_error("Can't open a file with path: " / filePath);
 
-    int numberOfWords{};
+    size_t wordsCount{};
     std::string fileLine{};
     while (std::getline(file, fileLine))
     {
         std::stringstream sstream(fileLine);
         std::string word{};
-        while(sstream >> word)
+        while (sstream >> word)
         {
-            numberOfWords++;
+            wordsCount++;
         }
     }
-    std::cout << numberOfWords << '\n';
 
     file.close();
+    return wordsCount;
+}
+
+size_t CountCharacters(const std::filesystem::path& filePath)
+{
+    std::wifstream file(filePath);
+    file.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+
+    if (!file.is_open())
+        throw std::runtime_error("Can't open a file with path: " / filePath);
+
+    size_t characterCount{};
+    wchar_t ch{};
+    while (file.get(ch))
+    {
+        characterCount++;
+    }
+
+    file.close();
+    return characterCount;
 }
 
 int main(int argc, char** argv)
 {
     std::vector<std::string> args = ConvertArgvToString(argc, argv);
 
-    std::string operation          = args[1];
-    std::filesystem::path filePath = args[2];
+    if (argc == 3)
+    {
+        std::string operation          = args[1];
+        std::filesystem::path filePath = args[2];
 
-    if (operation == "-c")
-        CountBytes(filePath);
-    if (operation == "-l")
-        CountLines(filePath);
-    if (operation == "-w")
-        CountWords(filePath);
+        try
+        {
+            if (operation == "-c")
+                CountBytes(filePath);
+            if (operation == "-l")
+                CountLines(filePath);
+            if (operation == "-w")
+                CountWords(filePath);
+            if (operation == "-m")
+                CountCharacters(filePath);
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << "Error: " << e.what() << '\n';
+        }
+    }
+
+    if (argc == 2)
+    {
+        std::filesystem::path filePath = args[1];
+        try
+        {
+            size_t lineCount  = CountLines(filePath);
+            size_t wordCount  = CountWords(filePath);
+            size_t bytesCount = CountBytes(filePath);
+            std::cout << '\t' << lineCount << '\t' << wordCount << '\t' << bytesCount << '\t' << filePath.string() << '\n';
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << "Error: " << e.what() << '\n';
+        }
+    }
 }

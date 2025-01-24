@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -Wall -Werror -pedantic -std=c++20
 
-TARGET = main
+TARGET = ccwc
 
 
 $(TARGET): main.o
