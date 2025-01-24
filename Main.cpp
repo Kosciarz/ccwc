@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <regex>
 #include <vector>
 
 size_t CountBytes(const std::filesystem::path& filePath) { return std::filesystem::file_size(filePath); }
