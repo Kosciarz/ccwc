@@ -1,6 +1,6 @@
 # CCWC
 
-This is a C++ implementation of the `wc` Linux tool written by me.
+This is a C++ implementation of the wc Linux tool written by me.
 
 It supports four different options:
 
@@ -21,4 +21,36 @@ To use CCWC:
 
 2. Build the executable:
 
-    `make`
+    ```sh
+    make
+    ```
+
+## Usage
+
+To use CCWC, run the executable with one of the supported options and a file path:
+
+```sh
+./ccwc -c example.txt
+./ccwc -l example.txt
+./ccwc -w example.txt
+./ccwc -m example.txt
+```
+
+You can also use it with input from `stdin`:
+
+```sh
+echo "Hello, world!" | ./ccwc -w
+```
+
+To display the help message:
+
+```sh
+./ccwc --help
+```
+
+## What I learned
+
+- How to use the C++ filesystem library for file operations.
+- Handling wide character streams with `std::wifstream`.
+- Implementing basic command-line argument parsing in C++.
+- Using `std::locale` and `std::codecvt_utf8` for UTF-8 file handling.
