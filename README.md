@@ -19,4 +19,4 @@ To use CCWC:
 
 2. Build the executable:
 
-    'make'
+    `make`
