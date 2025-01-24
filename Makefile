@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -Werror -pedantic -std=c++20
+CFLAGS = -Wall -Werror -pedantic -std=c++17
 
 TARGET = ccwc
 

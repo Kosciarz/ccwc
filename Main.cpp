@@ -1,59 +1,39 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <vector>
-
-std::vector<std::string> ConvertArgvToString(int argc, char** argv)
-{
-    std::vector<std::string> args{};
-    for (int i = 0; i < argc; ++i)
-    {
-        args.emplace_back(argv[i]);
-    }
-    return args;
-}
 
 size_t CountBytes(const std::filesystem::path& filePath)
 {
-    std::ifstream file(filePath);
-    if (!file.is_open())
-        throw std::runtime_error("Can't open a file with path: " / filePath);
-
-    size_t bytesCount{};
-    char ch{};
-    while (file.get(ch))
-    {
-        bytesCount++;
-    }
-
-    file.close();
-    return bytesCount;
+    auto byteCount = std::filesystem::file_size(filePath);
+    return byteCount;
 }
 
 size_t CountLines(const std::filesystem::path& filePath)
 {
     std::ifstream file(filePath);
     if (!file.is_open())
-        throw std::runtime_error("Can't open a file with path: " / filePath);
+        throw std::runtime_error("Cannot open a file with path: " / filePath);
 
-    size_t linesCount{};
+    size_t lineCount{};
     std::string fileLine{};
     while (std::getline(file, fileLine))
     {
-        linesCount++;
+        lineCount++;
     }
 
     file.close();
-    return linesCount;
+    return lineCount;
 }
 
 size_t CountWords(const std::filesystem::path& filePath)
 {
     std::ifstream file(filePath);
     if (!file.is_open())
-        throw std::runtime_error("Can't open a file with path: " / filePath);
+        throw std::runtime_error("Cannot open a file with path: " / filePath);
 
-    size_t wordsCount{};
+    size_t wordCount{};
     std::string fileLine{};
     while (std::getline(file, fileLine))
     {
@@ -61,12 +41,12 @@ size_t CountWords(const std::filesystem::path& filePath)
         std::string word{};
         while (sstream >> word)
         {
-            wordsCount++;
+            wordCount++;
         }
     }
 
     file.close();
-    return wordsCount;
+    return wordCount;
 }
 
 size_t CountCharacters(const std::filesystem::path& filePath)
@@ -75,7 +55,7 @@ size_t CountCharacters(const std::filesystem::path& filePath)
     file.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
 
     if (!file.is_open())
-        throw std::runtime_error("Can't open a file with path: " / filePath);
+        throw std::runtime_error("Cannot open a file with path: " / filePath);
 
     size_t characterCount{};
     wchar_t ch{};
@@ -88,45 +68,110 @@ size_t CountCharacters(const std::filesystem::path& filePath)
     return characterCount;
 }
 
-int main(int argc, char** argv)
+void DisplayHelp()
 {
-    std::vector<std::string> args = ConvertArgvToString(argc, argv);
+    std::cout << "Usage: ccwc [OPTION]... [FILE]..." << '\n'
+              << '\n'
+              << "The options are as below:" << '\n'
+              << "  -c\tprint the byte counts" << '\n'
+              << "  -m\tprint the character counts" << '\n'
+              << "  -l\tprint the newline counts" << '\n'
+              << "  -w\tprint the word counts" << '\n'
+              << "      --help\tdisplay this help and exit" << '\n';
+}
 
-    if (argc == 3)
+void PerformOperation(const std::filesystem::path& filePath, char op)
+{
+    switch (op)
     {
-        std::string operation          = args[1];
-        std::filesystem::path filePath = args[2];
+        case 'c':
+            std::cout << CountBytes(filePath) << '\n';
+            break;
+        case 'l':
+            std::cout << CountLines(filePath) << '\n';
+            break;
+        case 'w':
+            std::cout << CountWords(filePath) << '\n';
+            break;
+        case 'm':
+            std::cout << CountBytes(filePath) << '\n';
+            break;
+        default:
+            std::cerr << "Invalid option. Use -c, -l, -w or -m." << '\n';
+    }
+}
 
+bool IsValidOption(const std::string& op)
+{
+    return (op.length() == 2 && op[0] == '-') ? true : false;
+}
+
+int main(int argc, char* argv[])
+{
+    if (std::string(argv[1])== "--help")
+    {
+        DisplayHelp();
+        return 0;
+    }
+
+    if (argc == 2 && std::cin.peek())
+    {
+        if (!IsValidOption(argv[1]))
+        {
+            DisplayHelp();
+            return 1;
+        }
+
+        std::filesystem::path outputPath = "outputFile.txt";
+        std::ofstream outputFile(outputPath);
+        if (!outputFile.is_open())
+            throw std::runtime_error("Could not open file " / outputPath);
+
+        std::string line;            
+        while (std::getline(std::cin, line))
+        {
+            outputFile << line << '\n';
+        }
+
+        outputFile.close();        
+
+        PerformOperation(outputPath, argv[1][1]);
+
+        std::filesystem::remove(outputPath);
+    }
+    else if (argc == 2)
+    {
+        std::filesystem::path filePath = argv[1];
         try
         {
-            if (operation == "-c")
-                CountBytes(filePath);
-            if (operation == "-l")
-                CountLines(filePath);
-            if (operation == "-w")
-                CountWords(filePath);
-            if (operation == "-m")
-                CountCharacters(filePath);
+            size_t lineCount = CountLines(filePath);
+            size_t wordCount = CountWords(filePath);
+            size_t byteCount = CountBytes(filePath);
+            std::cout << lineCount << '\t' << wordCount << '\t' << byteCount << '\n';
         }
         catch (const std::exception& e)
         {
             std::cout << "Error: " << e.what() << '\n';
         }
     }
+    else if (argc == 3)
+    {   
+        if (!IsValidOption(argv[1]))
+        {
+            DisplayHelp();
+            return 1;
+        }
 
-    if (argc == 2)
-    {
-        std::filesystem::path filePath = args[1];
         try
         {
-            size_t lineCount  = CountLines(filePath);
-            size_t wordCount  = CountWords(filePath);
-            size_t bytesCount = CountBytes(filePath);
-            std::cout << '\t' << lineCount << '\t' << wordCount << '\t' << bytesCount << '\t' << filePath.string() << '\n';
+            PerformOperation(argv[2], argv[1][1]);
         }
         catch (const std::exception& e)
         {
             std::cout << "Error: " << e.what() << '\n';
         }
+        return 0;
     }
+
+    
 }
